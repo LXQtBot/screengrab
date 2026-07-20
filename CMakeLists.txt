@@ -50,7 +50,6 @@ find_package(
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(SCREENGRAB_VERSION "3.1.0")
 
@@ -62,12 +61,7 @@ endif()
 
 add_definitions(
     -DVERSION="${VERSION}"
-    -DQT_NO_FOREACH
 )
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
 
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 message(STATUS "Install prefix: " ${CMAKE_INSTALL_PREFIX})
