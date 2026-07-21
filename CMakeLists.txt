@@ -6,8 +6,6 @@ cmake_minimum_required(VERSION 3.18.0 FATAL_ERROR)
 # versions.
 project(screengrab)
 
-include(GNUInstallDirs)
-
 # options
 option(SG_DBUS_NOTIFY "Enable D-Bus notifications" ON)
 option(SG_EXT_EDIT "Enable ability to edit screenshots in external editor" ON)
@@ -66,6 +64,7 @@ add_definitions(
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 message(STATUS "Install prefix: " ${CMAKE_INSTALL_PREFIX})
 
+include(GNUInstallDirs)
 include(LXQtPreventInSourceBuilds)
 include(LXQtCompilerSettings NO_POLICY_SCOPE)
 include(LXQtTranslateTs)
