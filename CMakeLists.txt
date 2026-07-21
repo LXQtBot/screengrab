@@ -51,14 +51,8 @@ set(CMAKE_AUTOUIC ON)
 
 set(SCREENGRAB_VERSION "3.1.0")
 
-if (DEV_VERSION)
-    set(VERSION "${SCREENGRAB_VERSION}-dev (${DEV_VERSION})")
-else()
-    set(VERSION ${SCREENGRAB_VERSION})
-endif()
-
 add_definitions(
-    -DVERSION="${VERSION}"
+    -DVERSION="${SCREENGRAB_VERSION}"
 )
 
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
