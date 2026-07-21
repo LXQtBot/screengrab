@@ -1,7 +1,4 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
-include_directories(${Qt6Widgets_INCLUDE_DIRS})
-
-add_definitions(${Qt6Widgets_DEFINITIONS})
 
 set (QKSW_SRC
   src/qkeysequencewidget.cpp)
