@@ -11,6 +11,8 @@ option(SG_DBUS_NOTIFY "Enable D-Bus notifications" ON)
 option(SG_EXT_EDIT "Enable ability to edit screenshots in external editor" ON)
 option(UPDATE_TRANSLATIONS "Update source translation translations/*.ts files" OFF)
 
+set(SCREENGRAB_VERSION "3.1.0")
+
 # Minimum Versions
 set(KF6_MINIMUM_VERSION "6.0.0")
 set(QT_MINIMUM_VERSION "6.6.0")
@@ -46,8 +48,6 @@ find_package(
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
-
-set(SCREENGRAB_VERSION "3.1.0")
 
 add_definitions(
     -DVERSION="${SCREENGRAB_VERSION}"
