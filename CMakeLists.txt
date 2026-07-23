@@ -31,9 +31,7 @@ if (Qt6Gui_VERSION VERSION_GREATER_EQUAL "6.10.0")
     find_package(Qt6WaylandClientPrivate REQUIRED)
 endif()
 
-# right now we declare it as required
 find_package(X11 REQUIRED)
-set(HAVE_X11 1)
 
 find_package(
     XCB REQUIRED MODULE COMPONENTS
@@ -78,11 +76,8 @@ set(SCREENGRAB_SRC
     src/core/ui/mainwindow.cpp
     src/core/wayland/ScreenCopy.cpp
     src/core/wayland/ScreenShot.cpp
+    src/core/x11utils.cpp
 )
-
-if(X11_FOUND)
-    set(SCREENGRAB_SRC ${SCREENGRAB_SRC} src/core/x11utils.cpp)
-endif()
 
 set(SCREENGRAB_HDR
     src/core/singleapp.h
