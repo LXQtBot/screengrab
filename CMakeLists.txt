@@ -65,32 +65,6 @@ include(LXQtTranslateTs)
 include(LXQtTranslateDesktop)
 include(Qt6TranslationLoader)
 
-if(SG_EXT_EDIT)
-    add_definitions( -DSG_EXT_EDIT="1")
-    find_package(Qt6Xdg ${QTXDG_MINIMUM_VERSION} REQUIRED)
-endif()
-
-if(SG_DBUS_NOTIFY)
-    find_package(Qt6DBus ${QT_MINIMUM_VERSION} REQUIRED)
-    add_definitions( -DSG_DBUS_NOTIFY="1")
-endif()
-
-message(STATUS "Editing screenshots in external editor support: " ${SG_EXT_EDIT})
-message(STATUS "Enable D-Bus notifications: " ${SG_DBUS_NOTIFY})
-message(STATUS "Update source translation translations/*.ts files: " ${UPDATE_TRANSLATIONS})
-
-# app icon path
-add_definitions(-DSG_ICONPATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps/screengrab.svg")
-
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget/src")
-
-if (SG_EXT_EDIT)
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
-endif()
-
 set(SCREENGRAB_SRC
     src/core/main.cpp
     src/core/singleapp.cpp
@@ -106,10 +80,6 @@ set(SCREENGRAB_SRC
     src/core/wayland/ScreenShot.cpp
 )
 
-if(SG_DBUS_NOTIFY)
-    set(SCREENGRAB_SRC ${SCREENGRAB_SRC} src/core/dbusnotifier.cpp)
-endif()
-
 if(X11_FOUND)
     set(SCREENGRAB_SRC ${SCREENGRAB_SRC} src/core/x11utils.cpp)
 endif()
@@ -123,6 +93,29 @@ set(SCREENGRAB_UI
     src/core/ui/aboutwidget.ui
     src/core/ui/mainwindow.ui
 )
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget/src")
+# app icon path
+add_definitions(-DSG_ICONPATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps/screengrab.svg")
+
+if(SG_EXT_EDIT)
+    add_definitions( -DSG_EXT_EDIT="1")
+    find_package(Qt6Xdg ${QTXDG_MINIMUM_VERSION} REQUIRED)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
+endif()
+
+if(SG_DBUS_NOTIFY)
+    find_package(Qt6DBus ${QT_MINIMUM_VERSION} REQUIRED)
+    add_definitions( -DSG_DBUS_NOTIFY="1")
+    set(SCREENGRAB_SRC ${SCREENGRAB_SRC} src/core/dbusnotifier.cpp)
+endif()
+
+message(STATUS "Editing screenshots in external editor support: " ${SG_EXT_EDIT})
+message(STATUS "Enable D-Bus notifications: " ${SG_DBUS_NOTIFY})
+message(STATUS "Update source translation translations/*.ts files: " ${UPDATE_TRANSLATIONS})
 
 # Qt resource file
 set(SCREENGRAB_QRC screengrab.qrc)
