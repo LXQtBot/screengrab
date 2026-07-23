@@ -96,7 +96,6 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget/s
 add_definitions(-DSG_ICONPATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps/screengrab.svg")
 
 if(SG_EXT_EDIT)
-    add_definitions( -DSG_EXT_EDIT="1")
     find_package(Qt6Xdg ${QTXDG_MINIMUM_VERSION} REQUIRED)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
@@ -104,7 +103,6 @@ endif()
 
 if(SG_DBUS_NOTIFY)
     find_package(Qt6DBus ${QT_MINIMUM_VERSION} REQUIRED)
-    add_definitions( -DSG_DBUS_NOTIFY="1")
     set(SCREENGRAB_SRC ${SCREENGRAB_SRC} src/core/dbusnotifier.cpp)
 endif()
 
@@ -154,37 +152,37 @@ add_executable(screengrab
     ${SCREENGRAB_QM_LOADER}
 )
 
-if(SG_EXT_EDIT)
-    target_link_libraries(screengrab extedit)
-endif()
+target_link_libraries(screengrab
+    PUBLIC
+        KF6::WindowSystem
+        Qt6::Widgets
+        Qt6::WaylandClient
+        Qt6::Network
+        LayerShellQtInterface
+        ${X11_LIBRARIES}
+        $<$<BOOL:${SG_DBUS_NOTIFY}>:Qt6::DBus>
+        $<$<BOOL:${SG_EXT_EDIT}>:Qt6Xdg>
+    PRIVATE
+        qkeysequencewidget
+        Qt6::GuiPrivate
+        Qt6::WaylandClientPrivate
+        Qt6::WaylandGlobalPrivate
+        $<$<BOOL:${X11_XCB_FOUND}>:${X11_XCB_LIBRARIES}>
+        $<$<BOOL:${XCB_XCB_FOUND}>:${XCB_XCB_LIBRARY}>
+        $<$<BOOL:${XCB_SHAPE_FOUND}>:${XCB_SHAPE_LIBRARY}>
+        $<$<BOOL:${XCB_XFIXES_FOUND}>:${XCB_XFIXES_LIBRARY}>
+        $<$<BOOL:${SG_EXT_EDIT}>:extedit>
+)
 
-if(SG_DBUS_NOTIFY)
-    target_link_libraries(screengrab Qt6::DBus)
-endif()
-
-if (X11_XCB_FOUND)
-    add_definitions( -DX11_XCB_FOUND="1")
-    target_link_libraries(screengrab ${X11_XCB_LIBRARIES})
-endif()
-
-if (XCB_XCB_FOUND)
-    add_definitions( -DXCB_XCB_FOUND="1")
-    target_link_libraries(screengrab ${XCB_XCB_LIBRARY})
-endif()
-
-if (XCB_SHAPE_FOUND)
-    add_definitions( -DXCB_SHAPE_FOUND="1")
-    target_link_libraries(screengrab ${XCB_SHAPE_LIBRARY})
-endif()
-
-if (XCB_XFIXES_FOUND)
-    add_definitions( -DXCB_XFOXES_FOUND="1")
-    target_link_libraries(screengrab ${XCB_XFIXES_LIBRARY})
-endif()
-
-# Link with Network. See pull#86. TODO: Should be optional when upload module is needed.
-target_link_libraries(screengrab qkeysequencewidget Qt6::Widgets KF6::WindowSystem Qt6::Network ${X11_LIBRARIES}
-LayerShellQtInterface Qt6::GuiPrivate Qt6::WaylandClient Qt6::WaylandClientPrivate Qt6::WaylandGlobalPrivate)
+target_compile_definitions(screengrab
+    PRIVATE
+        $<$<BOOL:${X11_XCB_FOUND}>:X11_XCB_FOUND=1>
+        $<$<BOOL:${XCB_XCB_FOUND}>:XCB_XCB_FOUND=1>
+        $<$<BOOL:${XCB_SHAPE_FOUND}>:XCB_SHAPE_FOUND=1>
+        $<$<BOOL:${XCB_XFIXES_FOUND}>:XCB_XFOXES_FOUND=1>
+        $<$<BOOL:${SG_DBUS_NOTIFY}>:SG_DBUS_FOUND=11>
+        $<$<BOOL:${SG_EXT_EDIT}>:SG_EXT_EDIT=1>
+)
 
 qt6_generate_wayland_protocol_client_sources(screengrab FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/wayland/wlr-screencopy-unstable-v1.xml
