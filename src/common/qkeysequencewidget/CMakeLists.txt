@@ -10,8 +10,6 @@ set (QKSW_HDR
 set (QKSW_QRC
   qkeysequencewidget.qrc)
 
-qt6_add_resources(QKSW_QRC ${QKSW_QRC})
-
 add_library(qkeysequencewidget STATIC ${QKSW_SRC} ${QKSW_QRC})
 
 target_link_libraries(qkeysequencewidget Qt6::Widgets)

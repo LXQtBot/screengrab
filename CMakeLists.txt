@@ -48,6 +48,7 @@ find_package(
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 message(STATUS "Install prefix: " ${CMAKE_INSTALL_PREFIX})
@@ -108,7 +109,6 @@ message(STATUS "Update source translation translations/*.ts files: " ${UPDATE_TR
 
 # Qt resource file
 set(SCREENGRAB_QRC screengrab.qrc)
-qt6_add_resources(QRC_SOURCES ${SCREENGRAB_QRC})
 
 set(SCREENGRAB_CONFIG_FILES
     screengrab.conf
@@ -140,7 +140,7 @@ qt6_translation_loader(SCREENGRAB_QM_LOADER
 add_executable(screengrab
     ${SCREENGRAB_SRC}
     ${SCREENGRAB_UI_H}
-    ${QRC_SOURCES}
+    ${SCREENGRAB_QRC}
     ${SCREENGRAB_QMS}
     ${SCREENGRAB_DESKTOP_FILES}
     ${SCREENGRAB_QM_LOADER}
