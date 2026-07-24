@@ -49,10 +49,6 @@ find_package(
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_definitions(
-    -DVERSION="${SCREENGRAB_VERSION}"
-)
-
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 message(STATUS "Install prefix: " ${CMAKE_INSTALL_PREFIX})
 
@@ -182,6 +178,7 @@ target_compile_definitions(screengrab
 	$<$<BOOL:${XCB_XFIXES_FOUND}>:XCB_XFIXES_FOUND=1>
         $<$<BOOL:${SG_DBUS_NOTIFY}>:SG_DBUS_FOUND=11>
         $<$<BOOL:${SG_EXT_EDIT}>:SG_EXT_EDIT=1>
+	VERSION="${SCREENGRAB_VERSION}"
 )
 
 qt6_generate_wayland_protocol_client_sources(screengrab FILES
