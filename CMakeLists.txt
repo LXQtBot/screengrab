@@ -110,8 +110,6 @@ message(STATUS "Update source translation translations/*.ts files: " ${UPDATE_TR
 set(SCREENGRAB_QRC screengrab.qrc)
 qt6_add_resources(QRC_SOURCES ${SCREENGRAB_QRC})
 
-message(STATUS "Generating localize ...")
-
 set(SCREENGRAB_CONFIG_FILES
     screengrab.conf
 )
