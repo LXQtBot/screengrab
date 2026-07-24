@@ -153,7 +153,7 @@ target_link_libraries(screengrab
         Qt6::WaylandClient
         Qt6::Network
         LayerShellQtInterface
-        ${X11_LIBRARIES}
+        X11::X11
         $<$<BOOL:${SG_DBUS_NOTIFY}>:Qt6::DBus>
         $<$<BOOL:${SG_EXT_EDIT}>:Qt6Xdg>
     PRIVATE
@@ -161,10 +161,10 @@ target_link_libraries(screengrab
         Qt6::GuiPrivate
         Qt6::WaylandClientPrivate
         Qt6::WaylandGlobalPrivate
-        $<$<BOOL:${X11_XCB_FOUND}>:${X11_XCB_LIBRARIES}>
-        $<$<BOOL:${XCB_XCB_FOUND}>:${XCB_XCB_LIBRARY}>
-        $<$<BOOL:${XCB_SHAPE_FOUND}>:${XCB_SHAPE_LIBRARY}>
-        $<$<BOOL:${XCB_XFIXES_FOUND}>:${XCB_XFIXES_LIBRARY}>
+	$<$<BOOL:${X11_XCB_FOUND}>:X11::XCB>
+        $<$<BOOL:${XCB_XCB_FOUND}>:XCB::XCB>
+        $<$<BOOL:${XCB_SHAPE_FOUND}>:XCB::SHAPE>
+        $<$<BOOL:${XCB_XFIXES_FOUND}>:XCB::XFIXES>
         $<$<BOOL:${SG_EXT_EDIT}>:extedit>
 )
 
