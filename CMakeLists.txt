@@ -179,7 +179,7 @@ target_compile_definitions(screengrab
         $<$<BOOL:${X11_XCB_FOUND}>:X11_XCB_FOUND=1>
         $<$<BOOL:${XCB_XCB_FOUND}>:XCB_XCB_FOUND=1>
         $<$<BOOL:${XCB_SHAPE_FOUND}>:XCB_SHAPE_FOUND=1>
-        $<$<BOOL:${XCB_XFIXES_FOUND}>:XCB_XFOXES_FOUND=1>
+	$<$<BOOL:${XCB_XFIXES_FOUND}>:XCB_XFIXES_FOUND=1>
         $<$<BOOL:${SG_DBUS_NOTIFY}>:SG_DBUS_FOUND=11>
         $<$<BOOL:${SG_EXT_EDIT}>:SG_EXT_EDIT=1>
 )
