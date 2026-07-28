@@ -455,7 +455,7 @@ void Core::getActiveWindow() // called only with window screenshots
 
 void Core::grabCursor(int offsetX, int offsetY)
 {
-#ifdef XCB_XFOXES_FOUND
+#ifdef XCB_XFIXES_FOUND
     if (_conf->getIncludeCursor())
         X11Utils::compositePointer(offsetX, offsetY, _pixelMap);
 #else

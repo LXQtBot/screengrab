@@ -6,12 +6,12 @@ cmake_minimum_required(VERSION 3.18.0 FATAL_ERROR)
 # versions.
 project(screengrab)
 
-include(GNUInstallDirs)
-
 # options
 option(SG_DBUS_NOTIFY "Enable D-Bus notifications" ON)
 option(SG_EXT_EDIT "Enable ability to edit screenshots in external editor" ON)
 option(UPDATE_TRANSLATIONS "Update source translation translations/*.ts files" OFF)
+
+set(SCREENGRAB_VERSION "3.1.0")
 
 # Minimum Versions
 set(KF6_MINIMUM_VERSION "6.0.0")
@@ -33,9 +33,7 @@ if (Qt6Gui_VERSION VERSION_GREATER_EQUAL "6.10.0")
     find_package(Qt6WaylandClientPrivate REQUIRED)
 endif()
 
-# right now we declare it as required
 find_package(X11 REQUIRED)
-set(HAVE_X11 1)
 
 find_package(
     XCB REQUIRED MODULE COMPONENTS
@@ -50,59 +48,16 @@ find_package(
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTORCC ON)
 
-set(SCREENGRAB_VERSION "3.1.0")
-
-if (DEV_VERSION)
-    set(VERSION "${SCREENGRAB_VERSION}-dev (${DEV_VERSION})")
-else()
-    set(VERSION ${SCREENGRAB_VERSION})
-endif()
-
-add_definitions(
-    -DVERSION="${VERSION}"
-    -DQT_NO_FOREACH
-)
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
-message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 message(STATUS "Install prefix: " ${CMAKE_INSTALL_PREFIX})
 
+include(GNUInstallDirs)
 include(LXQtPreventInSourceBuilds)
 include(LXQtCompilerSettings NO_POLICY_SCOPE)
 include(LXQtTranslateTs)
 include(LXQtTranslateDesktop)
 include(Qt6TranslationLoader)
-
-if(SG_EXT_EDIT)
-    add_definitions( -DSG_EXT_EDIT="1")
-    find_package(Qt6Xdg ${QTXDG_MINIMUM_VERSION} REQUIRED)
-endif()
-
-if(SG_DBUS_NOTIFY)
-    find_package(Qt6DBus ${QT_MINIMUM_VERSION} REQUIRED)
-    add_definitions( -DSG_DBUS_NOTIFY="1")
-endif()
-
-message(STATUS "Editing screenshots in external editor support: " ${SG_EXT_EDIT})
-message(STATUS "Enable D-Bus notifications: " ${SG_DBUS_NOTIFY})
-message(STATUS "Update source translation translations/*.ts files: " ${UPDATE_TRANSLATIONS})
-
-# app icon path
-add_definitions(-DSG_ICONPATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps/screengrab.svg")
-
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget/src")
-
-if (SG_EXT_EDIT)
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
-endif()
 
 set(SCREENGRAB_SRC
     src/core/main.cpp
@@ -117,15 +72,8 @@ set(SCREENGRAB_SRC
     src/core/ui/mainwindow.cpp
     src/core/wayland/ScreenCopy.cpp
     src/core/wayland/ScreenShot.cpp
+    src/core/x11utils.cpp
 )
-
-if(SG_DBUS_NOTIFY)
-    set(SCREENGRAB_SRC ${SCREENGRAB_SRC} src/core/dbusnotifier.cpp)
-endif()
-
-if(X11_FOUND)
-    set(SCREENGRAB_SRC ${SCREENGRAB_SRC} src/core/x11utils.cpp)
-endif()
 
 set(SCREENGRAB_HDR
     src/core/singleapp.h
@@ -137,11 +85,29 @@ set(SCREENGRAB_UI
     src/core/ui/mainwindow.ui
 )
 
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/common/qkeysequencewidget/src")
+# app icon path
+add_definitions(-DSG_ICONPATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps/screengrab.svg")
+
+if(SG_EXT_EDIT)
+    find_package(Qt6Xdg ${QTXDG_MINIMUM_VERSION} REQUIRED)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/modules/extedit")
+endif()
+
+if(SG_DBUS_NOTIFY)
+    find_package(Qt6DBus ${QT_MINIMUM_VERSION} REQUIRED)
+    set(SCREENGRAB_SRC ${SCREENGRAB_SRC} src/core/dbusnotifier.cpp)
+endif()
+
+message(STATUS "Editing screenshots in external editor support: " ${SG_EXT_EDIT})
+message(STATUS "Enable D-Bus notifications: " ${SG_DBUS_NOTIFY})
+message(STATUS "Update source translation translations/*.ts files: " ${UPDATE_TRANSLATIONS})
+
 # Qt resource file
 set(SCREENGRAB_QRC screengrab.qrc)
-qt6_add_resources(QRC_SOURCES ${SCREENGRAB_QRC})
-
-message(STATUS "Generating localize ...")
 
 set(SCREENGRAB_CONFIG_FILES
     screengrab.conf
@@ -173,43 +139,44 @@ qt6_translation_loader(SCREENGRAB_QM_LOADER
 add_executable(screengrab
     ${SCREENGRAB_SRC}
     ${SCREENGRAB_UI_H}
-    ${QRC_SOURCES}
+    ${SCREENGRAB_QRC}
     ${SCREENGRAB_QMS}
     ${SCREENGRAB_DESKTOP_FILES}
     ${SCREENGRAB_QM_LOADER}
 )
 
-if(SG_EXT_EDIT)
-    target_link_libraries(screengrab extedit)
-endif()
+target_link_libraries(screengrab
+    PUBLIC
+        KF6::WindowSystem
+        Qt6::Widgets
+        Qt6::WaylandClient
+        Qt6::Network
+        LayerShellQtInterface
+        X11::X11
+        $<$<BOOL:${SG_DBUS_NOTIFY}>:Qt6::DBus>
+        $<$<BOOL:${SG_EXT_EDIT}>:Qt6Xdg>
+    PRIVATE
+        qkeysequencewidget
+        Qt6::GuiPrivate
+        Qt6::WaylandClientPrivate
+        Qt6::WaylandGlobalPrivate
+	$<$<BOOL:${X11_XCB_FOUND}>:X11::XCB>
+        $<$<BOOL:${XCB_XCB_FOUND}>:XCB::XCB>
+        $<$<BOOL:${XCB_SHAPE_FOUND}>:XCB::SHAPE>
+        $<$<BOOL:${XCB_XFIXES_FOUND}>:XCB::XFIXES>
+        $<$<BOOL:${SG_EXT_EDIT}>:extedit>
+)
 
-if(SG_DBUS_NOTIFY)
-    target_link_libraries(screengrab Qt6::DBus)
-endif()
-
-if (X11_XCB_FOUND)
-    add_definitions( -DX11_XCB_FOUND="1")
-    target_link_libraries(screengrab ${X11_XCB_LIBRARIES})
-endif()
-
-if (XCB_XCB_FOUND)
-    add_definitions( -DXCB_XCB_FOUND="1")
-    target_link_libraries(screengrab ${XCB_XCB_LIBRARY})
-endif()
-
-if (XCB_SHAPE_FOUND)
-    add_definitions( -DXCB_SHAPE_FOUND="1")
-    target_link_libraries(screengrab ${XCB_SHAPE_LIBRARY})
-endif()
-
-if (XCB_XFIXES_FOUND)
-    add_definitions( -DXCB_XFOXES_FOUND="1")
-    target_link_libraries(screengrab ${XCB_XFIXES_LIBRARY})
-endif()
-
-# Link with Network. See pull#86. TODO: Should be optional when upload module is needed.
-target_link_libraries(screengrab qkeysequencewidget Qt6::Widgets KF6::WindowSystem Qt6::Network ${X11_LIBRARIES}
-LayerShellQtInterface Qt6::GuiPrivate Qt6::WaylandClient Qt6::WaylandClientPrivate Qt6::WaylandGlobalPrivate)
+target_compile_definitions(screengrab
+    PRIVATE
+        $<$<BOOL:${X11_XCB_FOUND}>:X11_XCB_FOUND=1>
+        $<$<BOOL:${XCB_XCB_FOUND}>:XCB_XCB_FOUND=1>
+        $<$<BOOL:${XCB_SHAPE_FOUND}>:XCB_SHAPE_FOUND=1>
+	$<$<BOOL:${XCB_XFIXES_FOUND}>:XCB_XFIXES_FOUND=1>
+        $<$<BOOL:${SG_DBUS_NOTIFY}>:SG_DBUS_FOUND=11>
+        $<$<BOOL:${SG_EXT_EDIT}>:SG_EXT_EDIT=1>
+	VERSION="${SCREENGRAB_VERSION}"
+)
 
 qt6_generate_wayland_protocol_client_sources(screengrab FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/wayland/wlr-screencopy-unstable-v1.xml
